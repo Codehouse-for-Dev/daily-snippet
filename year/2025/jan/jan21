@@ -1,0 +1,27 @@
+1. 
+
+def api_gitlab_webhook(
+    request: HttpRequest,
+    user_profile: UserProfile,
+    *,
+    payload: JsonBodyPayload[WildValue],
+    branches: str | None = None,
+    use_merge_request_title: Json[bool] = True,
+    user_specified_topic: OptionalUserSpecifiedTopicStr = None,
+) -> HttpResponse:
+    event = get_event(request, payload, branches)
+    if event is not None:
+        event_body_function = get_body_based_on_event(event)
+        body = event_body_function(
+            payload,
+            include_title=user_specified_topic is not None,
+        )
+
+        # Add a link to the project if a custom topic is set
+        if user_specified_topic:
+            project_url = f"[{get_repo_name(payload)}]({get_project_homepage(payload)})"
+            body = f"[{project_url}] {body}"
+
+        topic_name = get_topic_based_on_event(event, payload, use_merge_request_title)
+        check_send_webhook_message(request, user_profile, topic_name, body, event)
+    return json_success(request)
