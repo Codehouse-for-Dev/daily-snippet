@@ -1,0 +1,52 @@
+Redux -> 
+yeah come on repeat with me first we click on cart button it will dispatch an action which will call a reducer function and it will update slice in the cart and then using selector it will update ui 
+
+Store -> 
+
+store.js file 
+
+import {configureStore} from "@reduxjs/toolkit" 
+import cartSlice from "./cartSlice";
+
+
+const store = configureStore({
+
+ reducer:{
+    cart: cartSlice,
+ },
+
+});
+export default store;
+
+
+cartSlice.js file 
+import {createSlice  } from "@reduxjs/toolkit";
+
+ const cartSlice= createSlice({
+    name: 'cart',
+    initialState: {
+        items:[],
+    },
+    reducers:{
+        addItem:(state,action)=>{
+           
+             state.items.push(action.payload);
+        },
+        removeItem:(state, action) =>{
+            state.items.pop();
+        },
+        clearCart:(state)=>{
+            state.items=[];
+        },
+    },
+}); 
+
+
+
+export const {addItem, removeItem, clearCart} =cartSlice.actions;
+export default cartSlice.reducer;
+
+
+use of selector -> 
+    const cartItems = useSelector(store =>store.cart.items);
+    
