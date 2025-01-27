@@ -1,0 +1,26 @@
+// Check if the user prefers dark mode
+const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+// Dynamically set a theme based on preference
+if (prefersDarkMode) {
+    document.body.style.backgroundColor = "#121212";
+    document.body.style.color = "#ffffff";
+    console.log("Dark mode applied! 🌙");
+} else {
+    document.body.style.backgroundColor = "#ffffff";
+    document.body.style.color = "#000000";
+    console.log("Light mode applied! ☀️");
+}
+
+// Listen for changes in the system's theme
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+    if (event.matches) {
+        document.body.style.backgroundColor = "#121212";
+        document.body.style.color = "#ffffff";
+        console.log("Switched to Dark mode! 🌙");
+    } else {
+        document.body.style.backgroundColor = "#ffffff";
+        document.body.style.color = "#000000";
+        console.log("Switched to Light mode! ☀️");
+    }
+});
