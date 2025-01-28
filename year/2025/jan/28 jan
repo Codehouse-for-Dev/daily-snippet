@@ -1,0 +1,19 @@
+// Debounce function implementation
+function debounce(func, delay) {
+    let timer;
+    return function (...args) {
+        clearTimeout(timer); // Clear previous timer
+        timer = setTimeout(() => func.apply(this, args), delay); // Set new timer
+    };
+}
+
+// Example: Optimize input event
+const search = (query) => {
+    console.log("Searching for:", query);
+};
+
+const debouncedSearch = debounce(search, 300);
+
+document.querySelector("input").addEventListener("input", (event) => {
+    debouncedSearch(event.target.value);
+});
