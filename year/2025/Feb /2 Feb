@@ -1,0 +1,145 @@
+CRUD USing go (To Do list )
+
+
+package main
+
+import (
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+
+	"github.com/gorilla/mux"
+	_ "github.com/go-sql-driver/mysql"
+)
+
+// Task structure
+type Task struct {
+	ID        int    `json:"id"`
+	Title     string `json:"title"`
+	Completed bool   `json:"completed"`
+}
+
+// Database variable
+var db *sql.DB
+
+// MySQL Credentials
+const (
+	DB_USER = "root"       // Change this to your MySQL username
+	DB_PASS = "password"   // Change this to your MySQL password
+	DB_NAME = "tododb"     // Must match your database name
+)
+
+// Initialize database
+func initDB() {
+	var err error
+	dsn := fmt.Sprintf("%s:%s@tcp(localhost:3306)/%s", DB_USER, DB_PASS, DB_NAME)
+	db, err = sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatal("Error connecting to the database:", err)
+	}
+
+	// Test connection
+	err = db.Ping()
+	if err != nil {
+		log.Fatal("Database connection failed:", err)
+	}
+
+	fmt.Println("Database connected ✅")
+}
+
+// Get all tasks
+func getTasks(w http.ResponseWriter, r *http.Request) {
+	rows, err := db.Query("SELECT id, title, completed FROM tasks")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var tasks []Task
+	for rows.Next() {
+		var task Task
+		if err := rows.Scan(&task.ID, &task.Title, &task.Completed); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		tasks = append(tasks, task)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tasks)
+}
+
+// Create a new task
+func createTask(w http.ResponseWriter, r *http.Request) {
+	var task Task
+	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	result, err := db.Exec("INSERT INTO tasks (title, completed) VALUES (?, ?)", task.Title, task.Completed)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	id, _ := result.LastInsertId()
+	task.ID = int(id)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(task)
+}
+
+// Update a task
+func updateTask(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	var task Task
+	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, err := db.Exec("UPDATE tasks SET title = ?, completed = ? WHERE id = ?", task.Title, task.Completed, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(task)
+}
+
+// Delete a task
+func deleteTask(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	_, err := db.Exec("DELETE FROM tasks WHERE id = ?", id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, "Task deleted successfully")
+}
+
+// Setup router
+func main() {
+	initDB()
+	defer db.Close()
+
+	router := mux.NewRouter()
+	router.HandleFunc("/tasks", getTasks).Methods("GET")
+	router.HandleFunc("/tasks", createTask).Methods("POST")
+	router.HandleFunc("/tasks/{id}", updateTask).Methods("PUT")
+	router.HandleFunc("/tasks/{id}", deleteTask).Methods("DELETE")
+
+	fmt.Println("Server started on port 8080 🚀")
+	log.Fatal(http.ListenAndServe(":8080", router))
+}
