@@ -1,0 +1,337 @@
+OOPs in js 
+
+// Blueprint
+Difference between class and object 
+
+class Car {
+  constructor(brand, color) {
+    this.brand = brand;
+    this.color = color;
+  }
+
+  drive() {
+    console.log(`Driving a ${this.color} ${this.brand}`);
+  }
+}
+
+// Actual car (object)
+let myCar = new Car("Toyota", "red");
+
+console.log(myCar.brand);  // Toyota
+myCar.drive();             // Driving a red Toyota
+
+-------------------------------------------------------------------------------
+# The constructor() is a special method inside a class.
+It is automatically called when you create a new object using the new keyword.
+
+Inside the constructor, this refers to the object being created.
+It allows you to assign values to the properties of the object.
+
+
+Class Person (){
+      constructor(name,age){
+      this.name = name 
+      this.age = age
+      }
+
+      function greet(){
+      console.log("greeting")
+      }
+
+}
+
+const Person1 = new Person("Ravi" , 17)
+
+Correct One 
+class Person { // ✅ lowercase 'class' and no parentheses
+
+  constructor(name, age) {
+    this.name = name;
+    this.age = age;
+  }
+
+  greet() { // ✅ No "function" keyword inside class
+    console.log("greeting");
+  }
+
+}
+
+const Person1 = new Person("Ravi", 17);
+Person1.greet(); // Output: greeting
+------------------------------------------------------------
+
+ Why "new" is important:
+It creates a new empty object {}.
+
+It sets this inside the constructor to point to that object.
+
+It links the object to the class’s prototype.
+
+It returns the object unless you return something else manually.
+
+
+
+----------------------------------------------------------------
+
+How to give default value for constructor 
+
+✅ Correct way to define default values:
+Use the = sign in the parameter list:
+
+js
+Copy
+Edit
+class Student {
+  constructor(name = "Unknown", claass = "10th", city = "Delhi") {
+    this.name = name;
+    this.claass = claass;
+    this.city = city;
+  }
+}
+
+const s1 = new Student();  
+console.log(s1);  
+// Output: Student { name: 'Unknown', claass: '10th', city: 'Delhi' }
+
+const s2 = new Student("Ravi", "12th", "Mumbai");  
+console.log(s2);  
+// Output: Student { name: 'Ravi', claass: '12th', city: 'Mumbai' }
+
+-------------------------------------------------------------------
+
+✅ Can you add a method outside the class using prototypes?
+Yes, absolutely!
+
+Here’s how 👇
+
+🔧 Example:
+js
+Copy
+Edit
+function Person(name, age) {
+  this.name = name;
+  this.age = age;
+}
+
+// Adding a method using prototype
+Person.prototype.greet = function () {
+  console.log(`Hello, my name is ${this.name}`);
+};
+
+const p1 = new Person("Ravi", 17);
+p1.greet(); // Output: Hello, my name is Ravi
+
+-------------------------------------------------------------
+class Animal(){
+constructor(){
+
+}
+
+makeSound(name){
+console.log("soung" , name )
+}
+
+}
+
+class Dos extend Animal (){
+makSound("Bhow Bhow ")
+}
+
+Correct Version ✅- 
+class Animal {
+  constructor() {
+    // Optional constructor
+  }
+
+  makeSound() {
+    console.log("Some generic animal sound");
+  }
+}
+
+class Dog extends Animal {
+  makeSound() {
+    console.log("Bark!");
+  }
+}
+
+const dog1 = new Dog();
+dog1.makeSound(); // Output: Bark!
+
+---------------------------------------
+
+What is super()?
+super() is used inside a child class constructor to call the parent class’s constructor.
+
+It helps the child class inherit properties from the parent.
+
+💡 Think of it like this:
+If Animal is a parent class and Dog is a child class...
+
+When you're creating a Dog, you're saying:
+
+“Hey parent Animal, please do your part first!”
+That’s what super() does.
+
+✅ Basic Example:
+js
+Copy
+Edit
+class Animal {
+  constructor(name) {
+    this.name = name;
+  }
+}
+
+class Dog extends Animal {
+  constructor(name, breed) {
+    super(name); // 👈 this calls Animal's constructor
+    this.breed = breed;
+  }
+
+  describe() {
+    console.log(`${this.name} is a ${this.breed}`);
+  }
+}
+
+const dog1 = new Dog("Tommy", "Labrador");
+dog1.describe(); // Tommy is a Labrador
+🔥 Why is super() important?
+If you don’t call super(), JavaScript will throw an error.
+
+It must be called before using this in the constructor of a child class.
+
+
+----------------------------------------------------------------------
+In JavaScript, every object has a hidden link to another object called its prototype.
+That prototype might have its own prototype… and so on.
+
+This chain of links is called the Prototype Chain.
+
+---------------------------------------------------------------------
+
+Types of Polymorphism in OOP:
+Method Overloading: Methods share the same name but differ in the number or type of parameters.
+
+Method Overriding: A subclass provides a specific implementation of a method already defined in its superclass.
+
+In JavaScript, polymorphism is mostly achieved through method overriding.
+
+Example of Polymorphism: Two Classes with the Same Method Name but Different Behaviors
+Let’s say we have two classes: Dog and Cat. Both of them have a makeSound method, but each class will implement the makeSound method differently. This is an example of method overriding and polymorphism.
+
+js
+Copy
+Edit
+class Animal {
+  makeSound() {
+    console.log("Some generic animal sound");
+  }
+}
+
+class Dog extends Animal {
+  makeSound() {
+    console.log("Bark! Bark!");
+  }
+}
+
+class Cat extends Animal {
+  makeSound() {
+    console.log("Meow! Meow!");
+  }
+}
+
+// Creating instances of Dog and Cat
+const dog = new Dog();
+const cat = new Cat();
+
+dog.makeSound(); // Output: Bark! Bark!
+cat.makeSound(); // Output: Meow! Meow!
+
+-----------------------------------------------------------------
+making private 
+
+🛠️ Ways to Simulate Private Properties:
+Using # (Private Fields) — ES2022 (latest JavaScript)
+This is the official way in modern JavaScript (from ES2022) to create private properties.
+
+Private fields are declared with # and are only accessible inside the class.
+
+js
+Copy
+Edit
+class User {
+  #password;  // Private field
+
+  constructor(username, password) {
+    this.username = username;
+    this.#password = password;
+  }
+
+  checkPassword(password) {
+    return password === this.#password;
+  }
+}
+
+const user = new User("john", "secret");
+console.log(user.checkPassword("secret"));  // true
+console.log(user.#password); // Error: Private field '#password' must be declared in an enclosing class
+The #password can only be accessed inside the class and gives you real private behavior.
+
+_--------------------------------------------------------------------------------------
+Why is Encapsulation Important in Object-Oriented Design?
+Encapsulation is another key pillar of OOP. It refers to the bundling of data (properties) and methods (functions) that operate on the data into a single unit, or class, and restricting access to some of the object's components. This is usually achieved by making some properties or methods private and others public.
+
+Key Reasons Why Encapsulation is Important:
+Data Hiding: By making certain properties private (using methods like getters and setters), you protect the object’s internal state from unwanted or accidental modifications. This reduces the risk of bugs.
+
+For example, a bank account balance should not be modified directly. Instead, it should be updated through a controlled method, ensuring the balance doesn’t go below zero or exceed certain limits.
+
+
+
+class BankAccount {
+  #balance;  // Private field
+
+  constructor(initialBalance) {
+    this.#balance = initialBalance;
+  }
+
+  // Getter method for balance
+  getBalance() {
+    return this.#balance;
+  }
+
+  // Deposit method with validation
+  deposit(amount) {
+    if (amount > 0) {
+      this.#balance += amount;
+      console.log(`Deposited $${amount}. New balance: $${this.#balance}`);
+    } else {
+      console.log("Invalid deposit amount");
+    }
+  }
+
+  // Withdraw method with validation
+  withdraw(amount) {
+    if (amount > 0 && amount <= this.#balance) {
+      this.#balance -= amount;
+      console.log(`Withdrew $${amount}. New balance: $${this.#balance}`);
+    } else {
+      console.log("Insufficient funds or invalid amount");
+    }
+  }
+}
+
+const account = new BankAccount(500);
+
+account.deposit(100);     // Output: Deposited $100. New balance: $600
+account.withdraw(200);    // Output: Withdrew $200. New balance: $400
+console.log(account.getBalance()); // Output: 400
+console.log(account.#balance);  // Error: Private field '#balance' must be declared in an enclosing class
+
+
+
+
+
+
+
+
